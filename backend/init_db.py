@@ -35,7 +35,7 @@ def init_db():
         admin_prefs = UserPreference(
             user=admin,
             preferred_season="Summer",
-            budget_range="Medium",
+            budget_range="Medium $$",
             interests="Historical sites,Cultural experiences,Local cuisine",
             travel_companions="Family",
             visit_goals="Cultural immersion"
@@ -49,8 +49,8 @@ def init_db():
             image_url="/static/images/cities/Damascus.jpg",
             latitude=33.5138,
             longitude=36.2765,
-            best_seasons="Spring,Autumn",
-            budget_category="Medium"
+            best_seasons="Spring,Autumn,Winter",
+            budget_category="Medium $$"
         )
         db.session.add(damascus)
         
@@ -60,8 +60,8 @@ def init_db():
             image_url="/static/images/cities/Aleppo.jpg",
             latitude=36.2021,
             longitude=37.1343,
-            best_seasons="Spring,Autumn",
-            budget_category="Medium"
+            best_seasons="Spring,Autumn,Winter",
+            budget_category="Medium $$"
         )
         db.session.add(aleppo)
         
@@ -72,7 +72,7 @@ def init_db():
             latitude=35.5317,
             longitude=35.7914,
             best_seasons="Summer,Late Spring",
-            budget_category="Medium to High"
+            budget_category="Medium to High $$-$$$"
         )
         db.session.add(latakia)
         
@@ -83,7 +83,7 @@ def init_db():
             latitude=34.8892,
             longitude=35.8878,
             best_seasons="Summer,Late Spring",
-            budget_category="Medium"
+            budget_category="Medium $$"
         )
         db.session.add(tartus)
         
@@ -93,8 +93,8 @@ def init_db():
             image_url="/static/images/cities/Homs.jpg",
             latitude=34.7324,
             longitude=36.7137,
-            best_seasons="Spring,Autumn",
-            budget_category="Low to Medium"
+            best_seasons="Spring,Autumn,Winter",
+            budget_category="Low to Medium $-$$"
         )
         db.session.add(homs)
         
@@ -104,8 +104,8 @@ def init_db():
             image_url="/static/images/cities/Palmyra.jpg",
             latitude=34.5682,
             longitude=38.2841,
-            best_seasons="Spring,Autumn",
-            budget_category="Medium"
+            best_seasons="Spring,Autumn,Winter",
+            budget_category="Medium $$"
         )
         db.session.add(palmyra)
         
@@ -115,8 +115,8 @@ def init_db():
             image_url="/static/images/cities/Bosra.jpg",
             latitude=32.5168,
             longitude=36.4817,
-            best_seasons="Spring,Autumn",
-            budget_category="Low to Medium"
+            best_seasons="Spring,Autumn,Winter",
+            budget_category="Low to Medium $-$$"
         )
         db.session.add(bosra)
         
@@ -126,8 +126,8 @@ def init_db():
             image_url="/static/images/cities/Hama.jpg",
             latitude=35.1318,
             longitude=36.7518,
-            best_seasons="Spring,Autumn",
-            budget_category="Low"
+            best_seasons="Spring,Autumn,Winter",
+            budget_category="Low $"
         )
         db.session.add(hama)
         
