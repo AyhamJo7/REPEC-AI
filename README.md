@@ -83,7 +83,9 @@ A locally hosted booking website exclusively focused on Syrian cities. It allows
 
    ```bash
    cd backend
-   flask run
+   flask run 
+   OR
+   python run.py
    ```
 
 2. **Access the application**
