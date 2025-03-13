@@ -277,29 +277,50 @@
                 
                 // Make options clickable
                 // Look for patterns like "🥶 Winter (December - February): Cool weather..." or "💲 Low ($30-60/day):"
-                const optionRegex = /((?:🥶|🌸|☀️|🍂|💲|🏛️|🎭|🌄|🍽️|🛍️|🧍|👫|👨‍👩‍👧‍👦|👯|🏖️|🧗|🧠|💼) [^:]+):(.*?)(?=(?:🥶|🌸|☀️|🍂|💲|🏛️|🎭|🌄|🍽️|🛍️|🧍|👫|👨‍👩‍👧‍👦|👯|🏖️|🧗|🧠|💼)|$)/gs;
+                const optionRegex = /((?:🥶|🌸|☀️|🍂|💲|💵|💰|🏛️|🎭|🌄|🍽️|🛍️|🧍|👫|👨‍👩‍👧‍👦|👯|🏖️|🧗|🧠|💼) [^:]+):(.*?)(?=\n\n|$)/gs;
                 
-                processedContent = processedContent.replace(optionRegex, (match, option, description) => {
+                // First, normalize newlines and ensure double newlines between options
+                processedContent = processedContent.replace(/\n{3,}/g, '\n\n'); // Replace 3+ newlines with 2
+                
+                // Extract and handle question headers (like "What's your budget range for this trip?")
+                processedContent = processedContent.replace(/(🗓️|💰|🔍|👥|🎯) ([^(]+\(Choose one(?:\s*or\s*more)?\))/g, '<h5 class="chat-question">$1 $2</h5>');
+                
+                // Add a special marker for options
+                processedContent = processedContent.replace(/((?:🥶|🌸|☀️|🍂|💲|💵|💰|🏛️|🎭|🌄|🍽️|🛍️|🧍|👫|👨‍👩‍👧‍👦|👯|🏖️|🧗|🧠|💼) [^:]+):(.*?)(?=\n\n|$)/gs, (match, option, description) => {
                     return `<div class="chat-option" data-value="${option.trim()}">
                         <strong>${option}</strong>${description}
                     </div>`;
                 });
+                
+                // Add spacing between options (removed extra height)
+                processedContent = processedContent.replace(/<\/div>\s*<div class="chat-option"/g, '</div><div class="chat-option"');
                 
                 messageContent.innerHTML = processedContent;
                 
                 // Add CSS for chat options
                 const style = document.createElement('style');
                 style.textContent = `
+                    .chat-question {
+                        font-weight: 600;
+                        margin-bottom: 15px;
+                        color: #343a40;
+                        font-size: 1.1rem;
+                    }
+                    
                     .chat-option {
-                        padding: 8px 12px;
+                        padding: 12px 16px;
                         margin: 5px 0;
                         background-color: #f8f9fa;
                         border-radius: 8px;
                         cursor: pointer;
-                        transition: background-color 0.2s;
+                        transition: background-color 0.2s, transform 0.1s;
+                        border: 1px solid #dee2e6;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
                     }
                     .chat-option:hover {
                         background-color: #e9ecef;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                     }
                 `;
                 document.head.appendChild(style);
