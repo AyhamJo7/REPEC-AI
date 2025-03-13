@@ -1,0 +1,516 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Travel Advisor - Syrian Compass{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle bg-white text-primary me-3">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">AI Travel Advisor</h4>
+                        <p class="mb-0 small">Get personalized Syrian city recommendations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Chat Messages Container -->
+                <div id="chatMessages" class="chat-messages mb-4">
+                    <!-- Dynamic Chat Messages will be loaded here -->
+                    
+                    <!-- Dynamic Chat Messages -->
+                    {% if chat_session and chat_session.messages %}
+                        {% for message in chat_session.messages %}
+                            <div class="message {% if message.role == 'user' %}user-message{% else %}ai-message{% endif %}">
+                                <div class="message-content">
+                                    {{ message.content|safe }}
+                                    
+                                    {% if message.contains_recommendation and message.recommended_city_id %}
+                                    <div class="recommendation-card mt-3">
+                                        <div class="row g-0">
+                                            <div class="col-md-4">
+                                                <img src="{{ message.recommended_city.image_url }}" class="img-fluid rounded-start" alt="{{ message.recommended_city.name }}" style="height: 100%; object-fit: cover;">
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ message.recommended_city.name }}</h5>
+                                                    <p class="card-text small">{{ message.recommended_city.description|truncate(100) }}</p>
+                                                    <div class="d-flex gap-2 mt-2">
+                                                        <a href="{{ url_for('main.city_detail', city_id=message.recommended_city_id) }}" class="btn btn-sm btn-primary">View Details</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="message-time">{{ message.created_at.strftime('%H:%M') }}</div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <!-- Typing Indicator (hidden by default) -->
+                <div id="typingIndicator" class="typing-indicator d-none">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                
+                <!-- Chat Input Form -->
+                <form id="chatForm" class="chat-form">
+                    <div class="input-group">
+                        <input type="text" id="userMessage" class="form-control" placeholder="Type your message..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Travel Preference Guide -->
+        <div class="card shadow mt-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Travel Preference Guide</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calendar-alt text-primary me-2"></i>Seasons</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Winter (Dec-Feb):</strong> Cool, occasional rain, fewer tourists</li>
+                            <li><strong>Spring (Mar-May):</strong> Mild, blooming landscapes, ideal for most activities</li>
+                            <li><strong>Summer (Jun-Aug):</strong> Hot, dry, busy tourist season</li>
+                            <li><strong>Autumn (Sep-Nov):</strong> Pleasant, harvest season, moderate crowds</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-money-bill-wave text-primary me-2"></i>Budget Ranges</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Low:</strong> $30-60/day (basic accommodations, local food)</li>
+                            <li><strong>Medium:</strong> $60-120/day (mid-range hotels, restaurants)</li>
+                            <li><strong>High:</strong> $120+/day (luxury accommodations, fine dining)</li>
+                        </ul>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-heart text-primary me-2"></i>Popular Interests</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Historical Sites:</strong> Ancient ruins, castles, archaeological sites</li>
+                            <li><strong>Cultural Experiences:</strong> Museums, traditional crafts, local festivals</li>
+                            <li><strong>Nature:</strong> Mountains, beaches, national parks, hiking</li>
+                            <li><strong>Cuisine:</strong> Food tours, cooking classes, local specialties</li>
+                            <li><strong>Shopping:</strong> Traditional markets, souks, handicrafts</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-users text-primary me-2"></i>Travel Companions</h6>
+                        <ul class="list-unstyled small mb-3">
+                            <li><strong>Solo:</strong> Flexibility, social opportunities, personal discovery</li>
+                            <li><strong>Couple:</strong> Romantic settings, shared experiences</li>
+                            <li><strong>Family:</strong> Kid-friendly activities, educational experiences</li>
+                            <li><strong>Friends:</strong> Group activities, social settings, shared costs</li>
+                        </ul>
+                        
+                        <h6><i class="fas fa-bullseye text-primary me-2"></i>Visit Goals</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Leisure:</strong> Relaxation, comfort, minimal planning</li>
+                            <li><strong>Adventure:</strong> Outdoor activities, unique experiences</li>
+                            <li><strong>Cultural Immersion:</strong> Local interactions, authentic experiences</li>
+                            <li><strong>Business:</strong> Convenient locations, networking opportunities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    
+    .chat-messages {
+        max-height: 500px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .message {
+        display: flex;
+        flex-direction: column;
+        max-width: 85%;
+    }
+    
+    .user-message {
+        align-self: flex-end;
+    }
+    
+    .ai-message {
+        align-self: flex-start;
+    }
+    
+    .message-content {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+    
+    .user-message .message-content {
+        background-color: #007bff;
+        color: white;
+        border-bottom-right-radius: 0;
+    }
+    
+    .ai-message .message-content {
+        background-color: #f0f2f5;
+        border-bottom-left-radius: 0;
+    }
+    
+    .message-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+        align-self: flex-end;
+    }
+    
+    .ai-message .message-time {
+        align-self: flex-start;
+    }
+    
+    .typing-indicator {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #6c757d;
+        border-radius: 50%;
+        margin-right: 4px;
+        animation: typing-animation 1.5s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) {
+        animation-delay: 0s;
+    }
+    
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+        margin-right: 0;
+    }
+    
+    @keyframes typing-animation {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    .recommendation-card {
+        background-color: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chatForm');
+        const userMessageInput = document.getElementById('userMessage');
+        const chatMessages = document.getElementById('chatMessages');
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        // Scroll to bottom of chat
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Add a new message to the chat
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // If it's an AI message, process it
+            if (!isUser) {
+                // List of Syrian cities to look for in the response
+                const cityNames = ["Damascus", "Aleppo", "Latakia", "Tartus", "Homs", "Palmyra", "Bosra", "Hama"];
+                let processedContent = content;
+                
+                // Replace city names with links
+                cityNames.forEach(cityName => {
+                    // Use a regex to find the city name but not if it's already in an HTML tag
+                    const regex = new RegExp(`(?<!<[^>]*)(${cityName})(?![^<]*>)`, 'g');
+                    processedContent = processedContent.replace(regex, `<a href="/cities/${cityName.toLowerCase()}" class="city-link">${cityName}</a>`);
+                });
+                
+                // Make options clickable
+                // Look for patterns like "🥶 Winter (December - February): Cool weather..." or "💲 Low ($30-60/day):"
+                const optionRegex = /((?:🥶|🌸|☀️|🍂|💲|🏛️|🎭|🌄|🍽️|🛍️|🧍|👫|👨‍👩‍👧‍👦|👯|🏖️|🧗|🧠|💼) [^:]+):(.*?)(?=(?:🥶|🌸|☀️|🍂|💲|🏛️|🎭|🌄|🍽️|🛍️|🧍|👫|👨‍👩‍👧‍👦|👯|🏖️|🧗|🧠|💼)|$)/gs;
+                
+                processedContent = processedContent.replace(optionRegex, (match, option, description) => {
+                    return `<div class="chat-option" data-value="${option.trim()}">
+                        <strong>${option}</strong>${description}
+                    </div>`;
+                });
+                
+                messageContent.innerHTML = processedContent;
+                
+                // Add CSS for chat options
+                const style = document.createElement('style');
+                style.textContent = `
+                    .chat-option {
+                        padding: 8px 12px;
+                        margin: 5px 0;
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: background-color 0.2s;
+                    }
+                    .chat-option:hover {
+                        background-color: #e9ecef;
+                    }
+                `;
+                document.head.appendChild(style);
+            } else {
+                messageContent.innerHTML = content;
+            }
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            const now = new Date();
+            messageTime.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            messageDiv.appendChild(messageContent);
+            messageDiv.appendChild(messageTime);
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Add click event listeners to city links and chat options
+            if (!isUser) {
+                // City links
+                const cityLinks = messageDiv.querySelectorAll('.city-link');
+                cityLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const cityName = this.textContent;
+                        // Fetch city ID based on name
+                        fetch(`/api/cities?name=${encodeURIComponent(cityName)}`)
+                            .then(response => response.json())
+                            .then(cities => {
+                                if (cities && cities.length > 0) {
+                                    window.location.href = `/cities/${cities[0].id}`;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching city:', error);
+                            });
+                    });
+                });
+                
+                // Chat options
+                const chatOptions = messageDiv.querySelectorAll('.chat-option');
+                chatOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        const optionValue = this.getAttribute('data-value');
+                        
+                        // Add user message to chat
+                        addMessage(optionValue, true);
+                        
+                        // Show typing indicator
+                        showTypingIndicator();
+                        
+                        // Send message to server
+                        fetch('/api/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: optionValue
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Hide typing indicator
+                            hideTypingIndicator();
+                            
+                            // Add AI response to chat
+                            if (data.success) {
+                                // If there's a recommendation card
+                                if (data.contains_recommendation && data.recommended_city_id) {
+                                    // Add the AI message
+                                    addMessage(data.message);
+                                    
+                                    // Reload the page to show the recommendation card properly
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1000);
+                                } else {
+                                    // Just add the regular message
+                                    addMessage(data.message);
+                                }
+                            } else {
+                                addMessage('Sorry, I encountered an error. Please try again.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            hideTypingIndicator();
+                            addMessage('Sorry, I encountered an error. Please try again.');
+                        });
+                    });
+                });
+            }
+            
+            scrollToBottom();
+        }
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            typingIndicator.classList.remove('d-none');
+            scrollToBottom();
+        }
+        
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            typingIndicator.classList.add('d-none');
+        }
+        
+        // Initialize - scroll to bottom and send initial message to get first question
+        scrollToBottom();
+        
+        // Function to send initial message to get the first question
+        function sendInitialMessage() {
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Send message to server
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: "start"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // Add AI response to chat
+                if (data.success) {
+                    addMessage(data.message);
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                hideTypingIndicator();
+                addMessage('Sorry, I encountered an error. Please try again.');
+            });
+        }
+        
+        // Send initial message if there are no messages yet
+        if (document.querySelectorAll('.message').length === 0) {
+            // Wait a short time to ensure everything is loaded
+            setTimeout(sendInitialMessage, 500);
+        }
+        
+        // Handle form submission
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const userMessage = userMessageInput.value.trim();
+                if (!userMessage) return;
+                
+                // Add user message to chat
+                addMessage(userMessage, true);
+                
+                // Clear input
+                userMessageInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Send message to server
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: userMessage
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide typing indicator
+                    hideTypingIndicator();
+                    
+                    // Add AI response to chat
+                    if (data.success) {
+                        // If there's a recommendation card
+                        if (data.contains_recommendation && data.recommended_city_id) {
+                            // Add the AI message
+                            addMessage(data.message);
+                            
+                            // Reload the page to show the recommendation card properly
+                            // This is a simple approach - in a production app, you might
+                            // dynamically create the recommendation card with JavaScript
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            // Just add the regular message
+                            addMessage(data.message);
+                        }
+                    } else {
+                        addMessage('Sorry, I encountered an error. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hideTypingIndicator();
+                    addMessage('Sorry, I encountered an error. Please try again.');
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Syrian Compass{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Welcome, {{ current_user.first_name or current_user.username }}!</h1>
+        
+        <!-- Dashboard Overview -->
+        <div class="row g-4 mb-5">
+            <!-- Bookings Card -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-circle bg-primary text-white me-3">
+                                <i class="fas fa-suitcase"></i>
+                            </div>
+                            <h5 class="card-title mb-0">My Bookings</h5>
+                        </div>
+                        <p class="card-text">You have {{ current_user.bookings.count() }} booking(s) in total.</p>
+                        
+                        {% set upcoming_bookings = current_user.bookings|selectattr('start_date', 'ge', now.date())|selectattr('status', 'ne', 'cancelled')|list %}
+                        {% if upcoming_bookings %}
+                        <p class="card-text">Your next trip is to <strong>{{ upcoming_bookings[0].city.name }}</strong> on {{ upcoming_bookings[0].start_date.strftime('%B %d, %Y') }}.</p>
+                        {% else %}
+                        <p class="card-text">You don't have any upcoming trips scheduled.</p>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('main.bookings') }}" class="btn btn-outline-primary">View All Bookings</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI Advisor Card -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-circle bg-success text-white me-3">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h5 class="card-title mb-0">AI Travel Advisor</h5>
+                        </div>
+                        <p class="card-text">Get personalized recommendations for your next Syrian adventure.</p>
+                        <p class="card-text">Our AI advisor will analyze your preferences to suggest the perfect destinations.</p>
+                        <a href="{{ url_for('main.chat') }}" class="btn btn-outline-success">Chat with AI</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Explore Card -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-circle bg-info text-white me-3">
+                                <i class="fas fa-map-marked-alt"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Explore Cities</h5>
+                        </div>
+                        <p class="card-text">Discover the beauty and rich heritage of Syrian cities.</p>
+                        <p class="card-text">Browse through detailed information about attractions, accommodations, and local experiences.</p>
+                        <a href="{{ url_for('main.cities') }}" class="btn btn-outline-info">Browse Cities</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Bookings -->
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Bookings</h5>
+                    <a href="{{ url_for('main.bookings') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% set recent_bookings = current_user.bookings|sort(attribute='created_at', reverse=true)|list %}
+                
+                {% if recent_bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Destination</th>
+                                <th>Dates</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in recent_bookings[:3] %}
+                            <tr>
+                                <td>{{ booking.city.name }}</td>
+                                <td>{{ booking.start_date.strftime('%b %d') }} - {{ booking.end_date.strftime('%b %d, %Y') }}</td>
+                                <td>
+                                    <span class="badge {% if booking.status == 'confirmed' %}bg-success{% elif booking.status == 'pending' %}bg-warning text-dark{% elif booking.status == 'cancelled' %}bg-danger{% elif booking.status == 'completed' %}bg-info{% endif %}">
+                                        {{ booking.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if booking.payment_status == 'paid' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                        {{ booking.payment_status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('main.booking_detail', booking_id=booking.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-suitcase fa-3x text-muted"></i>
+                    </div>
+                    <h5>No bookings yet</h5>
+                    <p class="text-muted">Start exploring Syrian cities and book your next adventure!</p>
+                    <a href="{{ url_for('main.cities') }}" class="btn btn-primary">Explore Cities</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Featured Cities -->
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Featured Cities</h5>
+                    <a href="{{ url_for('main.cities') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    {% for city in cities[:3] %}
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <img src="{{ city.image_url }}" class="card-img-top" alt="{{ city.name }}" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ city.name }}</h5>
+                                <p class="card-text text-truncate">{{ city.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-info">{{ city.budget_category }}</span>
+                                    <a href="{{ url_for('main.city_detail', city_id=city.id) }}" class="btn btn-sm btn-primary">Explore</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent AI Recommendations -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent AI Recommendations</h5>
+                    <a href="{{ url_for('main.chat') }}" class="btn btn-sm btn-outline-primary">Get New Recommendations</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% set recommendations = current_user.chat_sessions|selectattr('messages')|map(attribute='messages')|sum(start=[])|selectattr('contains_recommendation', 'equalto', true)|list %}
+                
+                {% if recommendations %}
+                <div class="list-group">
+                    {% for message in recommendations[:3] %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Recommendation for {{ message.recommended_city.name if message.recommended_city_id else 'Syrian cities' }}</h6>
+                            <small class="text-muted">{{ message.created_at.strftime('%b %d, %Y') }}</small>
+                        </div>
+                        <p class="mb-1 text-truncate">{{ message.content|striptags }}</p>
+                        {% if message.recommended_city_id %}
+                        <a href="{{ url_for('main.city_detail', city_id=message.recommended_city_id) }}" class="btn btn-sm btn-outline-primary mt-2">View City</a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-robot fa-3x text-muted"></i>
+                    </div>
+                    <h5>No recommendations yet</h5>
+                    <p class="text-muted">Chat with our AI advisor to get personalized city recommendations!</p>
+                    <a href="{{ url_for('main.chat') }}" class="btn btn-primary">Chat with AI</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

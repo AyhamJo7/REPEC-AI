@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Syrian Compass{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Profile Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="avatar-circle bg-primary text-white mx-auto mb-3">
+                        {{ current_user.username[0].upper() }}
+                    </div>
+                    <h4>{{ current_user.username }}</h4>
+                    <p class="text-muted">{{ current_user.email }}</p>
+                    <p class="small text-muted">Member since {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                </div>
+                
+                <div class="d-grid">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Travel Preferences</h5>
+            </div>
+            <div class="card-body">
+                {% if current_user.preferences %}
+                <ul class="list-group list-group-flush">
+                    {% if current_user.preferences.preferred_season %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-calendar-alt me-2 text-primary"></i>Preferred Season</span>
+                        <span class="badge bg-primary rounded-pill">{{ current_user.preferences.preferred_season }}</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% if current_user.preferences.budget_range %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-money-bill-wave me-2 text-primary"></i>Budget Range</span>
+                        <span class="badge bg-primary rounded-pill">{{ current_user.preferences.budget_range }}</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% if current_user.preferences.interests %}
+                    <li class="list-group-item">
+                        <div><i class="fas fa-heart me-2 text-primary"></i>Interests</div>
+                        <div class="mt-2">
+                            {% for interest in current_user.preferences.interests.split(',') %}
+                            <span class="badge bg-light text-dark me-1 mb-1">{{ interest }}</span>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    {% endif %}
+                    
+                    {% if current_user.preferences.travel_companions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-users me-2 text-primary"></i>Travel Companions</span>
+                        <span class="badge bg-primary rounded-pill">{{ current_user.preferences.travel_companions }}</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% if current_user.preferences.visit_goals %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-bullseye me-2 text-primary"></i>Visit Goals</span>
+                        <span class="badge bg-primary rounded-pill">{{ current_user.preferences.visit_goals }}</span>
+                    </li>
+                    {% endif %}
+                </ul>
+                {% else %}
+                <div class="text-center py-3">
+                    <p class="text-muted">No travel preferences set yet.</p>
+                    <a href="{{ url_for('main.chat') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-robot me-1"></i>Chat with AI to set preferences
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">My Bookings</h5>
+            </div>
+            <div class="card-body">
+                {% if current_user.bookings.count() > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>City</th>
+                                <th>Dates</th>
+                                <th>Status</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in current_user.bookings %}
+                            <tr>
+                                <td>{{ booking.city.name }}</td>
+                                <td>{{ booking.start_date.strftime('%b %d, %Y') }} - {{ booking.end_date.strftime('%b %d, %Y') }}</td>
+                                <td>
+                                    {% if booking.status == 'confirmed' %}
+                                    <span class="badge bg-success">Confirmed</span>
+                                    {% elif booking.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif booking.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    {% elif booking.status == 'completed' %}
+                                    <span class="badge bg-info">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td>${{ booking.total_price }}</td>
+                                <td>
+                                    <a href="{{ url_for('main.booking_detail', booking_id=booking.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-suitcase fa-3x text-muted"></i>
+                    </div>
+                    <h5>No bookings yet</h5>
+                    <p class="text-muted">Start exploring Syrian cities and book your next adventure!</p>
+                    <a href="{{ url_for('main.cities') }}" class="btn btn-primary">Explore Cities</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Recent AI Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% set recommendations = current_user.chat_sessions|selectattr('messages')|map(attribute='messages')|sum(start=[])|selectattr('contains_recommendation', 'equalto', true)|list %}
+                
+                {% if recommendations|length > 0 %}
+                <div class="list-group">
+                    {% for message in recommendations[:3] %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Recommendation for {{ message.recommended_city.name if message.recommended_city_id else 'Syrian cities' }}</h6>
+                            <small class="text-muted">{{ message.created_at.strftime('%b %d, %Y') }}</small>
+                        </div>
+                        <p class="mb-1 text-truncate">{{ message.content|striptags }}</p>
+                        {% if message.recommended_city_id %}
+                        <a href="{{ url_for('main.city_detail', city_id=message.recommended_city_id) }}" class="btn btn-sm btn-outline-primary mt-2">View City</a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-robot fa-3x text-muted"></i>
+                    </div>
+                    <h5>No recommendations yet</h5>
+                    <p class="text-muted">Chat with our AI advisor to get personalized city recommendations!</p>
+                    <a href="{{ url_for('main.chat') }}" class="btn btn-primary">Chat with AI</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" method="POST" action="{{ url_for('auth.profile') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ current_user.username }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ current_user.first_name or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ current_user.last_name or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Current Password (required to save changes)</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">New Password (leave blank to keep current)</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editProfileForm" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

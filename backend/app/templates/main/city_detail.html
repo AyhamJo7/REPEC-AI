@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ city.name }} - Syrian Compass{% endblock %}
+
+{% block content %}
+<!-- City Header -->
+<div class="city-header position-relative mb-5">
+    <div class="city-image-container">
+        <img src="{{ city.image_url }}" alt="{{ city.name }}" class="city-image">
+        <div class="city-image-overlay"></div>
+    </div>
+    <div class="container position-relative">
+        <div class="city-header-content text-white">
+            <h1 class="display-4 fw-bold">{{ city.name }}</h1>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% if 'Spring' in city.best_seasons %}
+                <span class="badge bg-success">Spring</span>
+                {% endif %}
+                {% if 'Summer' in city.best_seasons %}
+                <span class="badge bg-danger">Summer</span>
+                {% endif %}
+                {% if 'Autumn' in city.best_seasons %}
+                <span class="badge bg-warning text-dark">Autumn</span>
+                {% endif %}
+                {% if 'Winter' in city.best_seasons %}
+                <span class="badge bg-info">Winter</span>
+                {% endif %}
+                
+                <span class="badge bg-secondary">{{ city.budget_category }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- City Description -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-3">About {{ city.name }}</h2>
+                    <p class="card-text">{{ city.description }}</p>
+                </div>
+            </div>
+            
+            <!-- Attractions -->
+            <h2 class="h4 mb-3">Top Attractions</h2>
+            {% if attractions %}
+            <div class="row g-4 mb-5">
+                {% for attraction in attractions %}
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ attraction.image_url }}" class="card-img-top" alt="{{ attraction.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ attraction.name }}</h5>
+                            <span class="badge bg-primary mb-2">{{ attraction.category }}</span>
+                            <p class="card-text">{{ attraction.description }}</p>
+                            
+                            {% if attraction.address or attraction.visiting_hours or attraction.entrance_fee %}
+                            <div class="attraction-details mt-3">
+                                {% if attraction.address %}
+                                <div class="mb-1">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    <small>{{ attraction.address }}</small>
+                                </div>
+                                {% endif %}
+                                
+                                {% if attraction.visiting_hours %}
+                                <div class="mb-1">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    <small>{{ attraction.visiting_hours }}</small>
+                                </div>
+                                {% endif %}
+                                
+                                {% if attraction.entrance_fee %}
+                                <div>
+                                    <i class="fas fa-ticket-alt text-primary me-2"></i>
+                                    <small>{{ attraction.entrance_fee }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-5">
+                <i class="fas fa-info-circle me-2"></i>
+                No attractions have been added for this city yet.
+            </div>
+            {% endif %}
+            
+            <!-- Map -->
+            <h2 class="h4 mb-3">Location</h2>
+            <div class="card shadow-sm mb-5">
+                <div class="card-body p-0">
+                    <div id="cityMap" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Booking Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Book Your Trip</h5>
+                </div>
+                <div class="card-body">
+                    {% if current_user.is_authenticated %}
+                    <form id="bookingForm" action="{{ url_for('api.create_booking') }}" method="POST">
+                        <input type="hidden" name="city_id" value="{{ city.id }}">
+                        <input type="hidden" id="cityId" value="{{ city.id }}">
+                        
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="num_travelers" class="form-label">Number of Travelers</label>
+                            <select class="form-select" id="num_travelers" name="num_travelers" required>
+                                {% for i in range(1, 11) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Special Requests</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Book Now</button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-user-lock fa-3x text-muted mb-3"></i>
+                        <h5>Login to Book</h5>
+                        <p class="text-muted">You need to be logged in to book your trip to {{ city.name }}.</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+                        <p class="mt-2 mb-0">
+                            <small>Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a></small>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Best Time to Visit -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Best Time to Visit</h5>
+                </div>
+                <div class="card-body">
+                    <div class="seasons-chart mb-3">
+                        <div class="row g-1 text-center">
+                            <div class="col-3">
+                                <div class="season-block p-2 rounded {% if 'Winter' in city.best_seasons %}season-recommended{% endif %}">
+                                    <div class="season-icon mb-1">
+                                        <i class="fas fa-snowflake"></i>
+                                    </div>
+                                    <div class="season-name">Winter</div>
+                                    <div class="season-months small">Dec-Feb</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="season-block p-2 rounded {% if 'Spring' in city.best_seasons %}season-recommended{% endif %}">
+                                    <div class="season-icon mb-1">
+                                        <i class="fas fa-seedling"></i>
+                                    </div>
+                                    <div class="season-name">Spring</div>
+                                    <div class="season-months small">Mar-May</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="season-block p-2 rounded {% if 'Summer' in city.best_seasons %}season-recommended{% endif %}">
+                                    <div class="season-icon mb-1">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div class="season-name">Summer</div>
+                                    <div class="season-months small">Jun-Aug</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="season-block p-2 rounded {% if 'Autumn' in city.best_seasons %}season-recommended{% endif %}">
+                                    <div class="season-icon mb-1">
+                                        <i class="fas fa-leaf"></i>
+                                    </div>
+                                    <div class="season-name">Autumn</div>
+                                    <div class="season-months small">Sep-Nov</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="small text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Highlighted seasons are recommended for visiting {{ city.name }}.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Budget Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Budget Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="budget-category mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>Budget Category</span>
+                            <span class="badge bg-secondary">{{ city.budget_category }}</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            {% if 'Low' in city.budget_category %}
+                            <div class="progress-bar bg-success" style="width: 33%"></div>
+                            {% elif 'Medium' in city.budget_category %}
+                            <div class="progress-bar bg-success" style="width: 33%"></div>
+                            <div class="progress-bar bg-warning" style="width: 33%"></div>
+                            {% elif 'High' in city.budget_category %}
+                            <div class="progress-bar bg-success" style="width: 33%"></div>
+                            <div class="progress-bar bg-warning" style="width: 33%"></div>
+                            <div class="progress-bar bg-danger" style="width: 33%"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="budget-estimates">
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>Accommodation</span>
+                                {% if 'Low' in city.budget_category %}
+                                <span>$20-40/night</span>
+                                {% elif 'Medium' in city.budget_category %}
+                                <span>$40-80/night</span>
+                                {% elif 'High' in city.budget_category %}
+                                <span>$80-150/night</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>Meals</span>
+                                {% if 'Low' in city.budget_category %}
+                                <span>$10-20/day</span>
+                                {% elif 'Medium' in city.budget_category %}
+                                <span>$20-40/day</span>
+                                {% elif 'High' in city.budget_category %}
+                                <span>$40-80/day</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between">
+                                <span>Activities</span>
+                                {% if 'Low' in city.budget_category %}
+                                <span>$5-15/day</span>
+                                {% elif 'Medium' in city.budget_category %}
+                                <span>$15-30/day</span>
+                                {% elif 'High' in city.budget_category %}
+                                <span>$30-60/day</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI Recommendation -->
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body p-3">
+                    <h5><i class="fas fa-robot me-2"></i>Not sure if this city is right for you?</h5>
+                    <p class="mb-3">Get personalized recommendations based on your travel preferences.</p>
+                    <a href="{{ url_for('main.chat') }}" class="btn btn-light">Chat with AI Advisor</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<div id="cityData" 
+    data-id="{{ city.id }}"
+    data-name="{{ city.name }}"
+    data-latitude="{{ city.latitude }}"
+    data-longitude="{{ city.longitude }}"
+    style="display: none;"></div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .city-header {
+        margin-top: -1.5rem;
+    }
+    
+    .city-image-container {
+        position: relative;
+        height: 400px;
+        overflow: hidden;
+    }
+    
+    .city-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .city-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    }
+    
+    .city-header-content {
+        position: absolute;
+        bottom: 2rem;
+    }
+    
+    .season-block {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+    
+    .season-recommended {
+        background-color: #e8f4fd;
+        border-color: #007bff;
+        color: #007bff;
+    }
+    
+    .season-icon {
+        font-size: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get city data from hidden div
+        const cityDataElement = document.getElementById('cityData');
+        const cityId = cityDataElement.getAttribute('data-id');
+        const cityName = cityDataElement.getAttribute('data-name');
+        const cityLat = parseFloat(cityDataElement.getAttribute('data-latitude'));
+        const cityLng = parseFloat(cityDataElement.getAttribute('data-longitude'));
+        
+        // Initialize map
+        const map = L.map('cityMap').setView([cityLat, cityLng], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add marker for city
+        L.marker([cityLat, cityLng])
+            .addTo(map)
+            .bindPopup(cityName)
+            .openPopup();
+        
+        // Booking form validation
+        const bookingForm = document.getElementById('bookingForm');
+        if (bookingForm) {
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+            
+            // Set min date to today
+            const today = new Date();
+            const todayFormatted = today.toISOString().split('T')[0];
+            startDateInput.min = todayFormatted;
+            endDateInput.min = todayFormatted;
+            
+            // Update end date min when start date changes
+            startDateInput.addEventListener('change', function() {
+                endDateInput.min = startDateInput.value;
+                if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                    endDateInput.value = startDateInput.value;
+                }
+            });
+            
+            // Handle form submission
+            bookingForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    city_id: cityId,
+                    start_date: startDateInput.value,
+                    end_date: endDateInput.value,
+                    num_travelers: document.getElementById('num_travelers').value,
+                    notes: document.getElementById('notes').value
+                };
+                
+                // Send booking request
+                fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Redirect to booking details
+                        window.location.href = '/bookings/' + data.booking_id;
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your booking. Please try again.');
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

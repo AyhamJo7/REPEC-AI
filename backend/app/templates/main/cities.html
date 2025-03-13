@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Syrian Cities - Syrian Compass{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-4">Explore Syrian Cities</h1>
+        
+        <!-- Search and Filter -->
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <form id="filterForm" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="searchQuery" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="searchQuery" placeholder="Search cities...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="seasonFilter" class="form-label">Season</label>
+                        <select class="form-select" id="seasonFilter">
+                            <option value="">All Seasons</option>
+                            <option value="Winter">Winter</option>
+                            <option value="Spring">Spring</option>
+                            <option value="Summer">Summer</option>
+                            <option value="Autumn">Autumn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="budgetFilter" class="form-label">Budget</label>
+                        <select class="form-select" id="budgetFilter">
+                            <option value="">All Budgets</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Cities Grid -->
+        <div class="row g-4" id="citiesContainer">
+            {% for city in cities %}
+            <div class="col-md-6 col-lg-4 city-card">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{ city.image_url }}" class="card-img-top" alt="{{ city.name }}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ city.name }}</h5>
+                        <p class="card-text text-truncate">{{ city.description }}</p>
+                        
+                        <div class="mb-3">
+                            {% if 'Spring' in city.best_seasons %}
+                            <span class="badge bg-success me-1">Spring</span>
+                            {% endif %}
+                            {% if 'Summer' in city.best_seasons %}
+                            <span class="badge bg-danger me-1">Summer</span>
+                            {% endif %}
+                            {% if 'Autumn' in city.best_seasons %}
+                            <span class="badge bg-warning text-dark me-1">Autumn</span>
+                            {% endif %}
+                            {% if 'Winter' in city.best_seasons %}
+                            <span class="badge bg-info me-1">Winter</span>
+                            {% endif %}
+                            
+                            <span class="badge bg-secondary">{{ city.budget_category }}</span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <a href="{{ url_for('main.city_detail', city_id=city.id) }}" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- No Results Message (initially hidden) -->
+        <div id="noResults" class="text-center py-5 d-none">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4>No cities found</h4>
+            <p class="text-muted">Try adjusting your search criteria</p>
+            <button id="resetFilters" class="btn btn-outline-primary">Reset Filters</button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Recommendation CTA -->
+<div class="card bg-primary text-white shadow">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4><i class="fas fa-robot me-2"></i>Not sure which city to visit?</h4>
+                <p class="mb-md-0">Let our AI travel advisor help you find the perfect Syrian destination based on your preferences.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{{ url_for('main.chat') }}" class="btn btn-light">Get AI Recommendations</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterForm');
+        const searchQuery = document.getElementById('searchQuery');
+        const seasonFilter = document.getElementById('seasonFilter');
+        const budgetFilter = document.getElementById('budgetFilter');
+        const citiesContainer = document.getElementById('citiesContainer');
+        const noResults = document.getElementById('noResults');
+        const resetFilters = document.getElementById('resetFilters');
+        const cityCards = document.querySelectorAll('.city-card');
+        
+        // Filter cities based on form inputs
+        function filterCities() {
+            const query = searchQuery.value.toLowerCase();
+            const season = seasonFilter.value;
+            const budget = budgetFilter.value;
+            
+            let visibleCount = 0;
+            
+            cityCards.forEach(card => {
+                const cityName = card.querySelector('.card-title').textContent.toLowerCase();
+                const cityDesc = card.querySelector('.card-text').textContent.toLowerCase();
+                const citySeasons = Array.from(card.querySelectorAll('.badge')).map(badge => badge.textContent);
+                const cityBudget = card.querySelector('.badge.bg-secondary').textContent;
+                
+                // Check if city matches all filters
+                const matchesSearch = query === '' || cityName.includes(query) || cityDesc.includes(query);
+                const matchesSeason = season === '' || citySeasons.includes(season);
+                const matchesBudget = budget === '' || cityBudget.includes(budget);
+                
+                if (matchesSearch && matchesSeason && matchesBudget) {
+                    card.classList.remove('d-none');
+                    visibleCount++;
+                } else {
+                    card.classList.add('d-none');
+                }
+            });
+            
+            // Show/hide no results message
+            if (visibleCount === 0) {
+                noResults.classList.remove('d-none');
+                citiesContainer.classList.add('d-none');
+            } else {
+                noResults.classList.add('d-none');
+                citiesContainer.classList.remove('d-none');
+            }
+        }
+        
+        // Handle form submission
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            filterCities();
+        });
+        
+        // Handle input changes (for responsive filtering)
+        searchQuery.addEventListener('input', filterCities);
+        seasonFilter.addEventListener('change', filterCities);
+        budgetFilter.addEventListener('change', filterCities);
+        
+        // Reset filters
+        resetFilters.addEventListener('click', function() {
+            searchQuery.value = '';
+            seasonFilter.value = '';
+            budgetFilter.value = '';
+            filterCities();
+        });
+    });
+</script>
+{% endblock %}

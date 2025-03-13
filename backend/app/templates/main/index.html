@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Syrian Compass{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section position-relative mb-5">
+    <div class="hero-image-container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Aleppo_Citadel_01.jpg/1280px-Aleppo_Citadel_01.jpg" alt="Syrian Heritage" class="hero-image">
+        <div class="hero-overlay"></div>
+    </div>
+    <div class="container position-relative">
+        <div class="hero-content text-white">
+            <h1 class="display-3 fw-bold mb-3">Discover Syria's Hidden Treasures</h1>
+            <p class="lead mb-4">Explore the rich cultural heritage and breathtaking landscapes of Syria with personalized AI recommendations.</p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('main.chat') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-robot me-2"></i>Chat with AI Advisor
+                </a>
+                <a href="{{ url_for('main.cities') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-map-marked-alt me-2"></i>Explore Cities
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mb-5">
+    <div class="text-center mb-5">
+        <h2 class="mb-3">Why Choose Syrian Compass?</h2>
+        <p class="lead text-muted">Our AI-powered platform offers a unique way to discover the perfect Syrian destination for your next adventure.</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-primary text-white rounded-circle mb-3 mx-auto">
+                        <i class="fas fa-robot fa-2x"></i>
+                    </div>
+                    <h3 class="h4 card-title">AI-Powered Recommendations</h3>
+                    <p class="card-text text-muted">Our intelligent advisor analyzes your preferences to suggest the perfect Syrian destinations tailored just for you.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-primary text-white rounded-circle mb-3 mx-auto">
+                        <i class="fas fa-landmark fa-2x"></i>
+                    </div>
+                    <h3 class="h4 card-title">Rich Cultural Heritage</h3>
+                    <p class="card-text text-muted">Explore ancient cities, historical monuments, and archaeological sites dating back thousands of years.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-primary text-white rounded-circle mb-3 mx-auto">
+                        <i class="fas fa-route fa-2x"></i>
+                    </div>
+                    <h3 class="h4 card-title">Personalized Itineraries</h3>
+                    <p class="card-text text-muted">Discover attractions, accommodations, and experiences that match your interests, budget, and travel style.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="bg-light py-5 mb-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">How It Works</h2>
+            <p class="lead text-muted">Get personalized travel recommendations in just a few simple steps.</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="step-circle bg-primary text-white rounded-circle mb-3 mx-auto">1</div>
+                        <h3 class="h5 card-title">Chat with AI</h3>
+                        <p class="card-text text-muted">Share your travel preferences with our AI advisor through a simple conversation.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="step-circle bg-primary text-white rounded-circle mb-3 mx-auto">2</div>
+                        <h3 class="h5 card-title">Get Recommendations</h3>
+                        <p class="card-text text-muted">Receive personalized city recommendations based on your unique preferences.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="step-circle bg-primary text-white rounded-circle mb-3 mx-auto">3</div>
+                        <h3 class="h5 card-title">Explore Details</h3>
+                        <p class="card-text text-muted">Discover attractions, accommodations, and experiences in each recommended city.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="step-circle bg-primary text-white rounded-circle mb-3 mx-auto">4</div>
+                        <h3 class="h5 card-title">Book Your Trip</h3>
+                        <p class="card-text text-muted">Easily book your accommodations and experiences through our platform.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Cities Section -->
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Featured Cities</h2>
+        <a href="{{ url_for('main.cities') }}" class="btn btn-outline-primary">View All Cities</a>
+    </div>
+    
+    <div class="row g-4">
+        {% for city in featured_cities %}
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <img src="{{ city.image_url }}" class="card-img-top" alt="{{ city.name }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h3 class="h5 card-title">{{ city.name }}</h3>
+                    <p class="card-text text-truncate">{{ city.description }}</p>
+                    
+                    <div class="mb-3">
+                        {% if 'Spring' in city.best_seasons %}
+                        <span class="badge bg-success me-1">Spring</span>
+                        {% endif %}
+                        {% if 'Summer' in city.best_seasons %}
+                        <span class="badge bg-danger me-1">Summer</span>
+                        {% endif %}
+                        {% if 'Autumn' in city.best_seasons %}
+                        <span class="badge bg-warning text-dark me-1">Autumn</span>
+                        {% endif %}
+                        {% if 'Winter' in city.best_seasons %}
+                        <span class="badge bg-info me-1">Winter</span>
+                        {% endif %}
+                        
+                        <span class="badge bg-secondary">{{ city.budget_category }}</span>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a href="{{ url_for('main.city_detail', city_id=city.id) }}" class="btn btn-primary">Explore</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="bg-light py-5 mb-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">What Our Users Say</h2>
+            <p class="lead text-muted">Hear from travelers who have discovered Syria with our AI recommendations.</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-circle bg-primary text-white me-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h3 class="h5 card-title mb-0">Sarah Johnson</h3>
+                                <p class="text-muted small mb-0">Solo Traveler</p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="card-text text-muted">"The AI advisor recommended Damascus for my cultural immersion trip, and it was perfect! The historical sites and local cuisine were exactly what I was looking for."</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-circle bg-primary text-white me-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h3 class="h5 card-title mb-0">Michael Chen</h3>
+                                <p class="text-muted small mb-0">Family Vacation</p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="card-text text-muted">"We were unsure where to take our family in Syria, but the AI suggested Latakia for its beaches and kid-friendly activities. It was the perfect balance of relaxation and adventure!"</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-circle bg-primary text-white me-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h3 class="h5 card-title mb-0">Elena Rodriguez</h3>
+                                <p class="text-muted small mb-0">History Enthusiast</p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                        </div>
+                        <p class="card-text text-muted">"As a history buff, I was amazed by the AI's recommendation of Palmyra. The ancient ruins were breathtaking, and the detailed information provided helped me plan the perfect itinerary."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container mb-5">
+    <div class="card bg-primary text-white">
+        <div class="card-body p-5 text-center">
+            <h2 class="mb-3">Ready to Discover Syria?</h2>
+            <p class="lead mb-4">Let our AI-powered platform help you find the perfect Syrian destination for your next adventure.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('main.chat') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-robot me-2"></i>Chat with AI Advisor
+                </a>
+                <a href="{{ url_for('main.cities') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-map-marked-alt me-2"></i>Explore Cities
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- University Project Disclaimer -->
+<div class="container mb-5">
+    <div class="alert alert-info">
+        <div class="d-flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle fa-2x me-3"></i>
+            </div>
+            <div>
+                <h4 class="alert-heading">University Project Disclaimer</h4>
+                <p>Syrian Compass is a university project created for educational purposes. It demonstrates the integration of AI with a travel booking platform but does not process real bookings or payments.</p>
+                <p class="mb-0">All content, including city information, images, and user testimonials, is for demonstration purposes only.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .hero-section {
+        margin-top: -2rem;
+    }
+    
+    .hero-image-container {
+        position: relative;
+        height: 600px;
+        overflow: hidden;
+    }
+    
+    .hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+    }
+    
+    .hero-content {
+        position: absolute;
+        bottom: 5rem;
+        max-width: 700px;
+    }
+    
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-image-container {
+            height: 450px;
+        }
+        
+        .hero-content {
+            bottom: 2rem;
+        }
+    }
+</style>
+{% endblock %}

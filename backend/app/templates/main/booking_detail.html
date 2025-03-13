@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Details - Syrian Compass{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Booking Details</h4>
+                <span class="badge {% if booking.status == 'confirmed' %}bg-success{% elif booking.status == 'pending' %}bg-warning text-dark{% elif booking.status == 'cancelled' %}bg-danger{% elif booking.status == 'completed' %}bg-info{% endif %} fs-6">
+                    {{ booking.status|capitalize }}
+                </span>
+            </div>
+            <div class="card-body">
+                <!-- Booking Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Trip Information</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Destination:</span>
+                                <span class="fw-bold">{{ booking.city.name }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Check-in Date:</span>
+                                <span>{{ booking.start_date.strftime('%B %d, %Y') }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Check-out Date:</span>
+                                <span>{{ booking.end_date.strftime('%B %d, %Y') }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Duration:</span>
+                                <span>{{ (booking.end_date - booking.start_date).days }} days</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Number of Travelers:</span>
+                                <span>{{ booking.num_travelers }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Payment Information</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Total Price:</span>
+                                <span class="fw-bold">${{ booking.total_price }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Payment Status:</span>
+                                <span class="badge {% if booking.payment_status == 'paid' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {{ booking.payment_status|capitalize }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Booking Date:</span>
+                                <span>{{ booking.created_at.strftime('%B %d, %Y') }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span class="text-muted">Booking ID:</span>
+                                <span class="text-monospace">{{ booking.id }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Special Requests -->
+                {% if booking.notes %}
+                <div class="mb-4">
+                    <h5 class="mb-3">Special Requests</h5>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <p class="card-text mb-0">{{ booking.notes }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- City Information -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Destination Information</h5>
+                    <div class="card">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="{{ booking.city.image_url }}" class="img-fluid rounded-start" alt="{{ booking.city.name }}" style="height: 100%; object-fit: cover;">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ booking.city.name }}</h5>
+                                    <p class="card-text">{{ booking.city.description|truncate(200) }}</p>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        {% if 'Spring' in booking.city.best_seasons %}
+                                        <span class="badge bg-success">Spring</span>
+                                        {% endif %}
+                                        {% if 'Summer' in booking.city.best_seasons %}
+                                        <span class="badge bg-danger">Summer</span>
+                                        {% endif %}
+                                        {% if 'Autumn' in booking.city.best_seasons %}
+                                        <span class="badge bg-warning text-dark">Autumn</span>
+                                        {% endif %}
+                                        {% if 'Winter' in booking.city.best_seasons %}
+                                        <span class="badge bg-info">Winter</span>
+                                        {% endif %}
+                                        
+                                        <span class="badge bg-secondary">{{ booking.city.budget_category }}</span>
+                                    </div>
+                                    <a href="{{ url_for('main.city_detail', city_id=booking.city.id) }}" class="btn btn-outline-primary btn-sm">View City Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('main.bookings') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Bookings
+                    </a>
+                    
+                    <div class="d-flex gap-2">
+                        {% if booking.status == 'pending' %}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">
+                            <i class="fas fa-times me-2"></i>Cancel Booking
+                        </button>
+                        {% endif %}
+                        
+                        {% if booking.payment_status == 'unpaid' and booking.status != 'cancelled' %}
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                            <i class="fas fa-credit-card me-2"></i>Make Payment
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Booking Modal -->
+<div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-labelledby="cancelBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelBookingModalLabel">Cancel Booking</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel your booking to {{ booking.city.name }}?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelBtn">Cancel Booking</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Payment Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="mb-3">
+                        <label for="cardName" class="form-label">Name on Card</label>
+                        <input type="text" class="form-control" id="cardName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cardNumber" class="form-label">Card Number</label>
+                        <input type="text" class="form-control" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="expiryDate" class="form-label">Expiry Date</label>
+                            <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cvv" placeholder="XXX" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="amount" value="{{ booking.total_price }}" readonly>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirmPaymentBtn">Make Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cancel booking
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        if (confirmCancelBtn) {
+            confirmCancelBtn.addEventListener('click', function() {
+                // Send cancel request
+                fetch('/api/bookings/{{ booking.id }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'cancelled'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to show updated status
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while cancelling your booking. Please try again.');
+                });
+            });
+        }
+        
+        // Process payment
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        if (confirmPaymentBtn) {
+            confirmPaymentBtn.addEventListener('click', function() {
+                // Validate form
+                const paymentForm = document.getElementById('paymentForm');
+                if (!paymentForm.checkValidity()) {
+                    paymentForm.reportValidity();
+                    return;
+                }
+                
+                // Send payment request
+                fetch('/api/bookings/{{ booking.id }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        payment_status: 'paid'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to show updated status
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your payment. Please try again.');
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}
