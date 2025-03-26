@@ -81,7 +81,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="fas fa-compass text-primary me-2"></i>Syrian Compass
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Syrian Compass" height="30">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -157,7 +157,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h5 class="mb-3"><i class="fas fa-compass text-primary me-2"></i>Syrian Compass</h5>
+                    <h5 class="mb-3"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Syrian Compass" height="30"></h5>
                     <p class="text-muted">Discover the beauty and rich heritage of Syria through our AI-powered travel recommendation platform.</p>
                     <p class="text-muted small">This is a university project for educational purposes only.</p>
                 </div>
