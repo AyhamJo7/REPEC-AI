@@ -15,8 +15,10 @@ migrate = Migrate()
 login_manager = LoginManager()
 
 def create_app():
-    app = Flask(__name__)
-    
+    app = Flask(__name__, 
+            template_folder='../../frontend/templates',
+            static_folder='../../frontend/static')
+
     # Configure the app
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///app.db')
