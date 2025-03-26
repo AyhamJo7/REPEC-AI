@@ -1,6 +1,7 @@
 <img src="frontend/static/images/logo.png" alt="Syrian Compass Logo" width="200"/>
 
-# Syrian Cities Booking & AI Recommendation Platform
+## Reservation Efficiency Platform Easy Convenient Artifical Intelligence
+## Syrian Cities Booking & AI Recommendation Platform
 
 A locally hosted booking website exclusively focused on Syrian cities. It allows users to search, explore, and book travel experiences across various Syrian destinations. The platform features an integrated AI-driven recommendation engine (powered by the ChatGPT API) that interacts with users via a conversational chat interface.
 
@@ -35,8 +36,8 @@ A locally hosted booking website exclusively focused on Syrian cities. It allows
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/syrian-compass.git
-   cd syrian-compass
+   git clone https://github.com/aabousika/REPEC-AI.git
+   cd REPEC-AI
    ```
 
 2. **Create and activate a virtual environment**
