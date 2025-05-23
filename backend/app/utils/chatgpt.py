@@ -1,10 +1,10 @@
 import os
-import openai
+from openai import OpenAI
 from app.models.city import City
 from app import db
 
-# Initialize OpenAI API
-openai.api_key = os.environ.get('OPENAI_API_KEY')
+# Initialize OpenAI API client
+client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 class ChatGPTRecommender:
     def __init__(self):
@@ -185,7 +185,7 @@ To provide personalized recommendations, I'll ask you a few questions:
         
         try:
             # Call OpenAI API
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=messages,
                 temperature=0.7,
@@ -193,7 +193,7 @@ To provide personalized recommendations, I'll ask you a few questions:
             )
             
             # Extract response text
-            response_text = response.choices[0].message['content'].strip()
+            response_text = response.choices[0].message.content.strip()
             
             # Add assistant response to conversation history
             self.add_message("assistant", response_text)
@@ -245,7 +245,7 @@ To provide personalized recommendations, I'll ask you a few questions:
         
         try:
             # Call OpenAI API
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=messages,
                 temperature=0.7,
@@ -253,7 +253,7 @@ To provide personalized recommendations, I'll ask you a few questions:
             )
             
             # Extract response text
-            response_text = response.choices[0].message['content'].strip()
+            response_text = response.choices[0].message.content.strip()
             
             # Add assistant response to conversation history
             self.add_message("assistant", response_text)
